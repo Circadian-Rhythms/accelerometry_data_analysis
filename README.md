@@ -1,4 +1,4 @@
-# accelerometry_data
+# accelerometry_data_analysis
 
 There is a sample data file acquired by the wrist-worn device used in UKB in Folder 5: 
 
