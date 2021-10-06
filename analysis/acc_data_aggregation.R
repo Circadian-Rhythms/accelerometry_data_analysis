@@ -46,3 +46,9 @@ epoch_data <- function(data, meta, method = "mean", sample_rate = 60){
     )
   return(data)
 }
+
+get_moving_average <- function(data, k) {
+  data$data %>% mutate(
+    moving_average = ma(acceleration, k),
+  )
+}
