@@ -16,11 +16,11 @@ read_acc <- function(file){
   
   add_time_and_tidy <- function(data, meta){
     data <- data %>%
-      mutate(time = seq(meta$start, meta$end, by = meta$sample_rate)) %>%
+      mutate(date_time = seq(meta$start, meta$end, by = meta$sample_rate)) %>%
       rename(
         acceleration = colnames(data)[1]
       ) %>%
-      select(time, acceleration, imputed)
+      select(date_time, acceleration, imputed)
     return(data)
   }
   
@@ -30,18 +30,18 @@ read_acc <- function(file){
   return(list(data = data, meta = meta))
 }
 
-aggregate_by_minute <- function(data, meta, statistics = "mean"){
-  times_min <- seq(range(data$time)[1], range(data$time)[2], by = "1 min")
-  n_rep <- 60 / meta$sample_rate
+epoch_data <- function(data, meta, method = "mean", sample_rate = 60){
+  epoch_date_time <- seq(range(data$date_time)[1], range(data$date_time)[2], by = sample_rate)
+  n_rep <- sample_rate / meta$sample_rate
   data <- data %>%
     mutate(
-      time_group = rep(times_min, each = n_rep) 
+      epochs = rep(epoch_date_time, each = n_rep) 
     ) %>%
-    group_by(time_group) %>%
+    group_by(epochs) %>%
     summarise(
       acceleration = case_when(
-        statistics == "mean" ~ mean(acceleration),
-        statistics == "sum" ~ sum(acceleration) 
+        method == "mean" ~ mean(acceleration),
+        method == "sum" ~ sum(acceleration) 
       )
     )
   return(data)
