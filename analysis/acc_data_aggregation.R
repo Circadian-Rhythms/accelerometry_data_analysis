@@ -42,6 +42,11 @@ epoch_data <- function(data, meta, method = "mean", sample_rate = 60){
       acceleration = case_when(
         method == "mean" ~ mean(acceleration),
         method == "sum" ~ sum(acceleration) 
+      ),
+      imputed = ifelse(
+        any(as.logical(imputed)),
+        1,
+        0
       )
     )
   return(data)
