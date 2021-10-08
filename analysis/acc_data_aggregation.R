@@ -4,7 +4,7 @@ library(stringr)
 library(lubridate)
 library(forecast)
 
-read_acc <- function(file){
+read_acc <- function(file, standardise = TRUE){
   extract_meta_data <- function(data){
     meta_data <- colnames(data)[1]
     dates <- str_match_all(meta_data, "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")[[1]]
@@ -28,6 +28,9 @@ read_acc <- function(file){
   data <- read_csv(file, show_col_types = FALSE)
   meta <- extract_meta_data(data)
   data <- add_time_and_tidy(data, meta)
+  if (standardise == TRUE) {
+    data$acceleration <- scale(data$acceleration)
+  }
   return(list(data = data, meta = meta))
 }
 
