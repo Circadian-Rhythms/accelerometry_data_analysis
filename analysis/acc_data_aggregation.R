@@ -2,6 +2,7 @@ library(readr)
 library(dplyr)
 library(stringr)
 library(lubridate)
+library(forecast)
 
 read_acc <- function(file){
   extract_meta_data <- function(data){
@@ -24,7 +25,7 @@ read_acc <- function(file){
     return(data)
   }
   
-  data <- read_csv(file)
+  data <- read_csv(file, show_col_types = FALSE)
   meta <- extract_meta_data(data)
   data <- add_time_and_tidy(data, meta)
   return(list(data = data, meta = meta))
@@ -45,6 +46,14 @@ epoch_data <- function(data, meta, method = "mean", sample_rate = 60){
       )
     )
   return(data)
+}
+
+epoch_data2 <- function(data, meta, method = "mean", sample_rate = 60){
+  k <- sample_rate/meta$sample_rate
+  acc <- data$acceleration
+  n <- length(acc)
+  cuts <- split(acc, rep(1:ceiling(n/k), each=k)[1:n])
+  sapply(cuts, mean)
 }
 
 get_moving_average <- function(data, k) {
