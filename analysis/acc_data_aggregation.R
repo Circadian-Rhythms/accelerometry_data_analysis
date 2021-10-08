@@ -31,10 +31,12 @@ read_acc <- function(file){
   return(list(data = data, meta = meta))
 }
 
-epoch_data <- function(data, meta, method = "mean", sample_rate = 60){
-  epoch_date_time <- seq(range(data$date_time)[1], range(data$date_time)[2], by = sample_rate)
+epoch_data_slow <- function(data, method = "mean", sample_rate = 60){
+  df <- data$data
+  meta <- data$meta
+  epoch_date_time <- seq(range(df$date_time)[1], range(df$date_time)[2], by = sample_rate)
   n_rep <- sample_rate / meta$sample_rate
-  data <- data %>%
+  df <- df %>%
     mutate(
       epochs = rep(epoch_date_time, each = n_rep) 
     ) %>%
@@ -45,15 +47,25 @@ epoch_data <- function(data, meta, method = "mean", sample_rate = 60){
         method == "sum" ~ sum(acceleration) 
       )
     )
+  data$data <- df
+  data$meta$sample_rate <- sample_rate
   return(data)
 }
 
-epoch_data2 <- function(data, meta, method = "mean", sample_rate = 60){
+epoch_data_fast <- function(data, method = mean, sample_rate = 60){
+  meta <- data$meta
   k <- sample_rate/meta$sample_rate
-  acc <- data$acceleration
+  acc <- data$data$acceleration
   n <- length(acc)
   cuts <- split(acc, rep(1:ceiling(n/k), each=k)[1:n])
-  sapply(cuts, mean)
+  
+  date_time <- seq(range(data$data$date_time)[1], range(data$data$date_time)[2], by = sample_rate)
+  acceleration <- sapply(cuts, method)
+  df <- data.frame(date_time, acceleration)
+  
+  data$data <- df
+  data$meta$sample_rate <- sample_rate
+  return(data)
 }
 
 get_moving_average <- function(data, k) {
