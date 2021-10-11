@@ -1,0 +1,39 @@
+---
+title: "Benchmarking"
+author: "J. A. Kilgallen"
+date: "10/6/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+source("acc_data_aggregation.R")
+library(tidyr)
+library(forecast)
+library(microbenchmark)
+```
+# Reading in Files and Extracting Meta Data
+
+```{r read_data}
+microbenchmark(acc1 <- read_acc("../data/acc_sample_data_001.csv"), 
+               acc2 <- read_acc("../data/acc_sample_data_002.csv"))
+```
+As the output above shows, the function for reading in the csv files and extracting meta data (i.e. sample rate, start time, end time) run very quickly for both of our sample files. However, if necessary, it is possible that a performance increase could be gained by not changing the date time format from unix epochs to the more human friendly Y-M-D H:M:S.
+
+# Epoching Data
+
+For epoching data two algorithms were implemented:
+1. A simple readable piece of code using tidyverse functions.
+2. A function using base r, and the very fast function sapply.
+
+These functions accept desired sample rate (in the form of seconds elapsed between samples), and a method of aggregation e.g. sum, mean as arguments. 
+
+```{r epoch_data}
+microbenchmark(epoch_data_slow(acc1, sample_rate = 10), epoch_data_fast(acc1, sample_rate = 10), 
+               epoch_data_slow(acc1, sample_rate = 30), epoch_data_fast(acc1, sample_rate = 30),
+               epoch_data_slow(acc1, sample_rate = 60), epoch_data_fast(acc1, sample_rate = 60),
+               epoch_data_slow(acc1, sample_rate = 120), epoch_data_fast(acc1, sample_rate = 120),
+               epoch_data_slow(acc1, sample_rate = 600), epoch_data_fast(acc1, sample_rate = 600),
+               times = 10)
+```
