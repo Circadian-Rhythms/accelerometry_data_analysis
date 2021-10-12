@@ -6,11 +6,11 @@ library(ggplot2)
 acc1 <- read_acc("./data/sample1.csv")
 acc2 <- read_acc("./data/sample2.csv")
 
-data_mean <- epoch_data(acc1$data, acc1$meta)
+data_mean <- epoch_data(acc1$data, acc1$meta, method = "mean")
 ggplot(data_mean, aes(x = time_group, y = acceleration)) +
   geom_line()
 
-data_sum <- epoch_data(acc1$data, acc1$meta, statistics = "sum")
+data_sum <- epoch_data(acc1$data, acc1$meta, method = "sum")
 ggplot(data_sum, aes(x = time_group, y = acceleration)) +
   geom_line()
 
