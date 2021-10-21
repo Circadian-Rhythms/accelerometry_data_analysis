@@ -18,9 +18,9 @@ interdaily_stability <- function(acc, p = 3600) {
   return(IS)
 }
 
-intradaily_stability <- function(acc, p = 3600) {
+intradaily_stability <- function(acc) {
   # The formula for IV (intradaily stability) is:
-  # (n * \Sigma{k=1}{p}(x(i) - x(i-1))^2) / (n-1 * \Sigma{i=1}{n}(x(i) - x)^2)
+  # (n * \Sigma{k=1}{n}(x(i) - x(i-1))^2) / (n-1 * \Sigma{i=1}{n}(x(i) - x)^2)
   # Where x_i are the individual observations and x is the overall mean.
 
   x_i <- acc$data$acceleration
