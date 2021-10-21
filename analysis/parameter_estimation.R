@@ -12,8 +12,7 @@ interdaily_stability <- function(acc, p = 3600) {
   x_k <- epoch_data_fast(acc, sample_rate = p)$data$acceleration
   p <- length(x_k)
   
-  IS <- (n * sum((x_k - x) ** 2))
-  / (p * sum((x_i - x) ** 2))
+  IS <- (n * sum((x_k - x) ** 2)) / (p * sum((x_i - x) ** 2))
   
   return(IS)
 }
@@ -39,14 +38,12 @@ get_average_pattern <- function(acc) {
   average_pattern
 }
 
-RM <- function(acc) {
+RA <- function(acc) {
   #This algorithm may have to change as there is ambiguity in the definitions of M10 and L5
   # given in the paper by van Someren.
   samples_per_hour <- 60*60/acc$meta$sample_rate
   average_pattern <- get_average_pattern(acc)
   M10 <- max(ma(average_pattern$means, order = 10 * samples_per_hour, centre = FALSE), na.rm = TRUE)
   L5 <- min(ma(average_pattern$means, order = 5 * samples_per_hour), na.rm = TRUE)
-  print(M10)
-  print(L5)
   (M10 - L5)/(M10+L5)
 }
