@@ -1,13 +1,13 @@
 source("analysis/acc_data_aggregation.R")
 library(lubridate)
 
-interdaily_stability <- function(acc, p = 3600) {
+interdaily_stability <- function(acc, p = 3600, k = 60) {
   # The formula for IS (interdaily stability) is:
   # (n * \Sigma{k=1}{p}(x(k) - x)^2) / (p * \Sigma{i=1}{n}(x(i) - x)^2)
   # Where n is the number of observations, x(k) are the epoch means, x is the overall mean,
   # and x(i) are the individual observations of the average 24 hour pattern.
   average_pattern <- get_average_pattern(acc)
-  x_i <- average_pattern$data$acceleration
+  x_i <- epoch_data_fast(average_pattern, sample_rate = k)$data$acceleration
   n <- length(x_i)
   x <- mean(x_i)
   x_k <- epoch_data_fast(average_pattern, sample_rate = p)$data$acceleration
