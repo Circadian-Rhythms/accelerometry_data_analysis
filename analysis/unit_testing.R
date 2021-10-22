@@ -4,12 +4,12 @@ source("analysis/parameter_estimation.R")
 
 acc1 <- read_acc("data/acc_sample_data_001.csv", standardise = FALSE)
 
-acc_mod <- acc1$data %>%
+acc1_mod <- acc1$data %>%
   mutate(time = format(date_time, format = "%H:%M:%S"),
          date = date(date_time)) %>%
   select(date, time, acceleration)
 
-results <- nparACT_base("acc_mod", 1/5, 0)
+results <- nparACT_base("acc1_mod", 1/acc1$meta$sample_rate, 0)
 
 ra <- RA(acc1)
 IS <- interdaily_stability(acc1)
