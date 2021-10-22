@@ -11,10 +11,10 @@ acc1_mod <- acc1$data %>%
 
 results <- nparACT_base("acc1_mod", 1/acc1$meta$sample_rate, 0)
 
-ra <- RA(acc1)
+RA <- relative_amplitude(acc1)
 IS <- interdaily_stability(acc1)
-IV <- intradaily_stability(acc1)
+IV <- intradaily_variability(acc1)
 
 test_that("IS", expect_equal(IS, results[[1]], tolerance = 1e-2))
 test_that("IV", expect_equal(IV, results[[2]], tolerance = 1e-2))
-test_that("RA", expect_equal(ra, results[[3]], tolerance = 1e-2))
+test_that("RA", expect_equal(RA, results[[3]], tolerance = 1e-2))

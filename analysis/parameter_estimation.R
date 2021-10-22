@@ -17,7 +17,7 @@ interdaily_stability <- function(acc, p = 3600) {
   return(IS)
 }
 
-intradaily_stability <- function(acc, p = 3600) {
+intradaily_variability <- function(acc, p = 3600) {
   # The formula for IV (intradaily stability) is:
   # (n * \Sigma{k=1}{n}(x(i) - x(i-1))^2) / (n-1 * \Sigma{i=1}{n}(x(i) - x)^2)
   # Where x_i are the individual observations and x is the overall mean.
@@ -39,7 +39,7 @@ get_average_pattern <- function(acc) {
   list(data = average_pattern[,c("date_time", "acceleration")], meta = acc$meta) 
 }
 
-RA <- function(acc) {
+relative_amplitude <- function(acc) {
   #This algorithm may have to change as there is ambiguity in the definitions of M10 and L5
   # given in the paper by van Someren.
   samples_per_hour <- 60*60/acc$meta$sample_rate
