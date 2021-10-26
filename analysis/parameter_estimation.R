@@ -1,7 +1,7 @@
 source("analysis/acc_data_aggregation.R")
 library(lubridate)
 
-interdaily_stability <- function(acc, p = 3600, k = 60) {
+interdaily_stability <- function(acc, p = 3600, k = acc$meta_data$sample_rate) {
   # The formula for IS (interdaily stability) is:
   # (n * \Sigma{k=1}{p}(x(k) - x)^2) / (p * \Sigma{i=1}{n}(x(i) - x)^2)
   # Where n is the number of observations, x(k) are the epoch means, x is the overall mean,
