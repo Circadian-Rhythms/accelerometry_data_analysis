@@ -4,7 +4,7 @@ library(stringr)
 library(lubridate)
 library(forecast)
 
-read_acc <- function(file, standardise = TRUE){
+read_acc <- function(file, standardise = FALSE){
   extract_meta_data <- function(data){
     meta_data <- colnames(data)[1]
     dates <- str_match_all(meta_data, "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")[[1]]
