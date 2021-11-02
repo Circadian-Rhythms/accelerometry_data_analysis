@@ -25,7 +25,7 @@ read_acc <- function(file, standardise = TRUE){
     return(data)
   }
   
-  data <- read_csv(file, show_col_types = FALSE)
+  data <- read_csv(file)
   meta <- extract_meta_data(data)
   data <- add_time_and_tidy(data, meta)
   if (standardise == TRUE) {
