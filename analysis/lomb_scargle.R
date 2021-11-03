@@ -1,6 +1,4 @@
-library(Rmpfr)
-
-ls_periodograms <- function(x, y, freqs, centered = T, normalize = T, precision = T){
+ls_periodograms <- function(x, y, freqs, centered = T, normalize = T){
   # R.H.D. Townsend, “Fast calculation of the Lomb-Scargle periodogram using 
   # graphics processing units.”, The Astrophysical Journal Supplement Series, 
   # vol 191, pp. 247-253, 2010 - Scipy
@@ -8,14 +6,8 @@ ls_periodograms <- function(x, y, freqs, centered = T, normalize = T, precision 
   m_freqs <- diag(freqs)
   m <- m_x %*% m_freqs
 
-  if (precision) {
-    y <- mpfr(y, 128)
-    c <- mpfr(apply(m, MARGIN = 2, cos), 128)
-    s <- mpfr(apply(m, MARGIN = 2, sin), 128)
-  } else{
-    c <- apply(m, MARGIN = 2, cos)
-    s <- apply(m, MARGIN = 2, sin)
-  }
+  c <- apply(m, MARGIN = 2, cos)
+  s <- apply(m, MARGIN = 2, sin)
   
   y_raw <- y
   if (centered) {
@@ -28,7 +20,7 @@ ls_periodograms <- function(x, y, freqs, centered = T, normalize = T, precision 
   ss <- colSums(s^2)
   cs <- colSums(c * s)
   
-  tau <- 2 * cs / (cc - ss)
+  tau <- atan2(2 * cs, cc - ss) / (2 * freqs)
   
   c_tau <- cos(freqs * tau)
   s_tau <- sin(freqs * tau)
@@ -40,9 +32,6 @@ ls_periodograms <- function(x, y, freqs, centered = T, normalize = T, precision 
   if (normalize) {
     pgram <- 2 * pgram / sum(y_raw^2)
   }
-  
-  if (precision) {
-    pgram <- as.double(pgram)
-  }
+
   return(pgram)
 }
