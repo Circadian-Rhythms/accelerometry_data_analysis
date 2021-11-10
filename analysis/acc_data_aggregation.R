@@ -4,7 +4,7 @@ library(stringr)
 library(lubridate)
 library(forecast)
 
-read_acc <- function(file, standardise = TRUE){
+read_acc <- function(file){
   extract_meta_data <- function(data){
     meta_data <- colnames(data)[1]
     dates <- str_match_all(meta_data, "\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}")[[1]]
@@ -28,9 +28,6 @@ read_acc <- function(file, standardise = TRUE){
   data <- read_csv(file)
   meta <- extract_meta_data(data)
   data <- add_time_and_tidy(data, meta)
-  if (standardise == TRUE) {
-    data$acceleration <- scale(data$acceleration)
-  }
   return(list(data = data, meta = meta))
 }
 
@@ -55,20 +52,16 @@ epoch_data_slow <- function(data, method = "mean", sample_rate = 60){
   return(data)
 }
 
-epoch_data_fast <- function(data, method = mean, sample_rate = 60){
-  meta <- data$meta
-  k <- sample_rate/meta$sample_rate
-  acc <- data$data$acceleration
-  n <- length(acc)
-  cuts <- split(acc, rep(1:ceiling(n/k), each=k)[1:n])
+epoch_data <- function(df, current_sample_rate, desired_sample_rate = 60, method = mean){
+  k <- desired_sample_rate/current_sample_rate
+  n <- length(df$acceleration)
+  cuts <- split(df$acceleration, rep(1:ceiling(n/k), each=k)[1:n])
   
-  date_time <- seq(range(data$data$date_time)[1], range(data$data$date_time)[2], by = sample_rate)
+  date_time <- seq(range(df$date_time)[1], range(df$date_time)[2], by = desired_sample_rate)
   acceleration <- sapply(cuts, method)
   df <- data.frame(date_time, acceleration)
-  
-  data$data <- df
-  data$meta$sample_rate <- sample_rate
-  return(data)
+
+  return(df)
 }
 
 get_moving_average <- function(data, k) {
