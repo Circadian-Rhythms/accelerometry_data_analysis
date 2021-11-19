@@ -31,7 +31,7 @@ intradaily_variability <- function(df, sample_rate, p = 3600) {
   return(IV)
 }
 
-get_average_pattern <- function(df) {
+get_average_hourly_pattern <- function(df) {
   average_pattern <- df %>%
     group_by(hour = hour(date_time), minute = minute(date_time), second = second(date_time)) %>%
     summarise(acceleration = mean(acceleration)) %>% 
@@ -40,10 +40,8 @@ get_average_pattern <- function(df) {
 }
 
 relative_amplitude <- function(df, sample_rate) {
-  #This algorithm may have to change as there is ambiguity in the definitions of M10 and L5
-  # given in the paper by van Someren.
   samples_per_hour <- 60*60/sample_rate
-  average_acceleration <- get_average_pattern(df)$acceleration
+  average_acceleration <- get_average_hourly_pattern(df)$acceleration
   M10 <- max(ma(average_acceleration, order = 10 * samples_per_hour, centre = FALSE), na.rm = TRUE)
   L5 <- min(ma(average_acceleration, order = 5 * samples_per_hour), na.rm = TRUE)
   (M10 - L5)/(M10+L5)
