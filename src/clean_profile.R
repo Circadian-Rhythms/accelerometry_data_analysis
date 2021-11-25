@@ -13,9 +13,9 @@ dev.off()
 profile <- profile %>%
   filter(!chronotype %in% c(-1, -3)) %>%
   mutate(
-    shift_work = ifelse(is.na(shift_work), "NA", shift_work),
-    work_hours = ifelse(is.na(work_hours), -1, work_hours),
-    night_shift_work = ifelse(is.na(night_shift_work), "NA", night_shift_work)
+    shift_work = ifelse(is.na(shift_work), 1, shift_work),
+    work_hours = ifelse(is.na(work_hours), 0, work_hours),
+    night_shift_work = ifelse(is.na(night_shift_work), 1, night_shift_work)
   ) %>%
   mutate_at(
     c("sex", "ethnic", "chronotype", "insomnia", "shift_work", 
@@ -66,11 +66,11 @@ profile_clean <- profile_clean %>%
     urbanization = profile_clean$population_density_cat
   )
 
-profile_clean$population_density
-profile_clean$inv_dist_major_road
-profile_clean$traffic_major_road
-profile_clean$inv_dist_road
-profile_clean$traffic_road
-profile_clean$noise_pollution
+# profile_clean$population_density
+# profile_clean$inv_dist_major_road
+# profile_clean$traffic_major_road
+# profile_clean$inv_dist_road
+# profile_clean$traffic_road
+# profile_clean$noise_pollution
 
 write_rds(profile_clean, file = "./data/profile.rds")
