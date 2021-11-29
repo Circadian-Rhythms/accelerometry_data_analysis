@@ -2,6 +2,9 @@ library(dplyr)
 library(readr)
 library(DataExplorer)
 library(ggplot2)
+library(factoextra)
+library(FactoMineR)
+library(RColorBrewer)
 
 profile <- read_csv("./data/profile_data.csv")
 
@@ -15,12 +18,20 @@ profile <- profile %>%
   mutate(
     shift_work = ifelse(is.na(shift_work), 1, shift_work),
     work_hours = ifelse(is.na(work_hours), 0, work_hours),
-    night_shift_work = ifelse(is.na(night_shift_work), 1, night_shift_work)
+    night_shift_work = ifelse(is.na(night_shift_work), 1, night_shift_work),
+    ethnic = case_when(
+      ethnic %in% c(1001, 1002, 1003) ~ 1,
+      ethnic %in% c(2001, 2002, 2003, 2004) ~ 2,
+      ethnic %in% c(3001, 3002, 3003, 3004) ~ 3,
+      ethnic %in% c(4001, 4002, 4003) ~ 4,
+      T ~ ethnic
+    )
   ) %>%
   mutate_at(
     c("sex", "ethnic", "chronotype", "insomnia", "shift_work", 
       "night_shift_work", "smoking", "alcohol", "employment", "loneliness", 
       "depressed", "gp_depressed"), as.factor)
+# Include effect of space (coordinates)
 
 png("./images/clean/missing_distribution_after.png", width = 720)
 plot_missing(profile)
@@ -30,7 +41,37 @@ dev.off()
 profile_clean <- profile[complete.cases(profile), ]
 1 - nrow(profile_clean) / nrow(profile)
 
-# Creating urbanicity variable
+# Creating urbanization variable
+## PCA to find optimal linear combination of numerical variables of urbanization 
+profile_clean %>%
+  mutate(
+    maj_road = inv_dist_major_road * traffic_major_road,
+    road = inv_dist_road * traffic_road
+  ) %>%
+  select(
+    maj_road, inv_dist_major_road, traffic_major_road,
+    road, inv_dist_road, traffic_road
+  ) %>%
+  plot_correlation(type = "c")
+ggsave("images/clean/correlation_road_variables.png", width = 9)
+
+pca_data <- profile_clean %>%
+  mutate(
+    maj_road = inv_dist_major_road * traffic_major_road,
+    road = inv_dist_road * traffic_road
+  ) %>%
+  select(maj_road, road, noise_pollution) %>%
+  mutate_all(function(x) (x - mean(x) / sd(x)))
+
+pca_urb <- PCA(pca_data, graph = F)
+get_eigenvalue(pca_urb)
+
+png("./images/clean/pca_components.png", width = 720)
+fviz_pca_var(pca_urb, col.var = "cos2", gradient.cols = brewer.pal(3, "YlOrRd"),
+             repel = TRUE)
+dev.off()
+
+## Population density distribution
 ggplot(profile_clean, 
        aes(y = (..count..) / sum(..count..), x = as.factor(population_density))) +
   geom_bar()
@@ -63,7 +104,7 @@ ggsave("./images/clean/population_density_cat.png", width = 10)
 
 profile_clean <- profile_clean %>%
   mutate(
-    urbanization = profile_clean$population_density_cat
+    urbanization = pca_urb$ind$coord[, 1]
   )
 
 # profile_clean$population_density
