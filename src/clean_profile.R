@@ -13,19 +13,24 @@ plot_missing(profile)
 dev.off()
 
 # Adding NA level and transform variables as factor
-profile <- profile %>%
-  filter(!chronotype %in% c(-1, -3)) %>%
+profile_filtered <- profile %>%
+  filter(
+    !chronotype %in% c(-1, -3) & !ethnic %in% c(-1, -3) & insomnia != -3 &
+      !shift_work %in% c(-1, -3) & !night_shift_work %in% c(-1, -3) &
+      smoking != -3 & alcohol != -3 & employment != -3 & 
+      !loneliness %in% c(-1, -3) & !depressed %in% c(-1, -3) & 
+      !gp_depressed %in% c(-1, -3)) %>%
   mutate(
-    shift_work = ifelse(is.na(shift_work), 1, shift_work),
-    work_hours = ifelse(is.na(work_hours), 0, work_hours),
-    night_shift_work = ifelse(is.na(night_shift_work), 1, night_shift_work),
     ethnic = case_when(
       ethnic %in% c(1001, 1002, 1003) ~ 1,
       ethnic %in% c(2001, 2002, 2003, 2004) ~ 2,
       ethnic %in% c(3001, 3002, 3003, 3004) ~ 3,
       ethnic %in% c(4001, 4002, 4003) ~ 4,
       T ~ ethnic
-    )
+    ),
+    shift_work = ifelse(is.na(shift_work), 1, shift_work),
+    work_hours = ifelse(is.na(work_hours), 0, work_hours),
+    night_shift_work = ifelse(is.na(night_shift_work), 1, night_shift_work)
   ) %>%
   mutate_at(
     c("sex", "ethnic", "chronotype", "insomnia", "shift_work", 
@@ -33,13 +38,18 @@ profile <- profile %>%
       "depressed", "gp_depressed"), as.factor)
 # Include effect of space (coordinates)
 
+# Percentage of missing data
+1 - nrow(profile_filtered) / nrow(profile)
+
 png("./images/clean/missing_distribution_after.png", width = 720)
-plot_missing(profile)
+plot_missing(profile_filtered)
 dev.off()
 
 # Percentage of missing data
-profile_clean <- profile[complete.cases(profile), ]
+profile_clean <- profile_filtered[complete.cases(profile_filtered), ]
+1 - nrow(profile_clean) / nrow(profile_filtered)
 1 - nrow(profile_clean) / nrow(profile)
+dim(profile_filter)
 
 # Creating urbanization variable
 ## PCA to find optimal linear combination of numerical variables of urbanization 
@@ -106,12 +116,5 @@ profile_clean <- profile_clean %>%
   mutate(
     urbanization = pca_urb$ind$coord[, 1]
   )
-
-# profile_clean$population_density
-# profile_clean$inv_dist_major_road
-# profile_clean$traffic_major_road
-# profile_clean$inv_dist_road
-# profile_clean$traffic_road
-# profile_clean$noise_pollution
 
 write_rds(profile_clean, file = "./data/profile.rds")
